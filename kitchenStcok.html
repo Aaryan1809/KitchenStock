@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <title>KitchenStock</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap"
+            rel="stylesheet" />
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            :root {
+                --bg: #0f0e0c;
+                --bg2: #181610;
+                --bg3: #201e18;
+                --bg4: #272420;
+                --border: #2c2924;
+                --amber: #e8a020;
+                --amber2: #f5c842;
+                --red: #e05252;
+                --green: #52c97a;
+                --text: #ede8de;
+                --text2: #998f7a;
+                --text3: #56504a;
+                --radius: 14px;
+                --safe-b: env(safe-area-inset-bottom, 0px);
+                --safe-t: env(safe-area-inset-top, 0px);
+            }
+
+            html,
+            body {
+                height: 100%;
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                overflow: hidden;
+            }
+
+            .page {
+                position: fixed;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                transition: opacity .25s, transform .25s;
+            }
+
+            .page.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(14px);
+            }
+
+            /* ════════ AUTH ════════ */
+            #page-auth {
+                align-items: center;
+                justify-content: center;
+                padding: 20px 20px;
+                background: var(--bg);
+                overflow-y: auto;
+            }
+
+            #page-auth::before {
+                content: '';
+                position: fixed;
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 320px;
+                height: 320px;
+                background: radial-gradient(circle, rgba(232, 160, 32, .13) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .auth-box {
+                width: 100%;
+                max-width: 400px;
+                background: var(--bg2);
+                border: 1px solid var(--border);
+                border-radius: 22px;
+                padding: 30px 22px 26px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .auth-box::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--amber), transparent);
+            }
+
+            .auth-logo {
+                font-family: 'Syne', sans-serif;
+                font-size: 28px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+                margin-bottom: 3px;
+            }
+
+            .auth-logo em {
+                color: var(--amber);
+                font-style: normal;
+            }
+
+            .auth-tag {
+                font-size: 13px;
+                color: var(--text2);
+                margin-bottom: 26px;
+            }
+
+            .auth-tabs {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                background: var(--bg3);
+                border-radius: 12px;
+                padding: 4px;
+                gap: 4px;
+                margin-bottom: 22px;
+            }
+
+            .auth-tab {
+                padding: 12px;
+                border: none;
+                border-radius: 9px;
+                font-family: 'DM Sans', sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                background: transparent;
+                color: var(--text2);
+                cursor: pointer;
+                transition: all .2s;
+            }
+
+            .auth-tab.active {
+                background: var(--amber);
+                color: var(--bg);
+            }
+
+            .fl {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+                color: var(--text2);
+                font-weight: 600;
+                margin-bottom: 7px;
+                display: block;
+            }
+
+            .fi {
+                width: 100%;
+                padding: 16px 16px;
+                background: var(--bg3);
+                border: 1.5px solid var(--border);
+                border-radius: 12px;
+                color: var(--text);
+                font-family: 'DM Mono', monospace;
+                font-size: 17px;
+                outline: none;
+                margin-bottom: 14px;
+                transition: border-color .2s;
+                appearance: none;
+            }
+
+            .fi:focus {
+                border-color: var(--amber);
+            }
+
+            .fi::placeholder {
+                color: var(--text3);
+                font-size: 15px;
+            }
+
+            .auth-btn {
+                width: 100%;
+                padding: 17px;
+                background: var(--amber);
+                color: var(--bg);
+                border: none;
+                border-radius: 12px;
+                font-family: 'Syne', sans-serif;
+                font-size: 17px;
+                font-weight: 700;
+                cursor: pointer;
+                margin-top: 4px;
+                min-height: 56px;
+                transition: background .15s, transform .1s;
+            }
+
+            .auth-btn:active {
+                transform: scale(.97);
+                background: var(--amber2);
+            }
+
+            .auth-btn:disabled {
+                opacity: .5;
+            }
+
+            .auth-err {
+                background: rgba(224, 82, 82, .1);
+                border: 1px solid rgba(224, 82, 82, .25);
+                color: var(--red);
+                border-radius: 10px;
+                padding: 13px 14px;
+                font-size: 13px;
+                margin-top: 12px;
+                display: none;
+                line-height: 1.4;
+            }
+
+            /* ════════ APP ════════ */
+            #page-app {
+                background: var(--bg);
+            }
+
+            .app-header {
+                flex-shrink: 0;
+                background: var(--bg2);
+                border-bottom: 1px solid var(--border);
+                padding: 0 16px;
+                padding-top: var(--safe-t);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: calc(58px + var(--safe-t));
+                z-index: 10;
+            }
+
+            .hbrand {
+                font-family: 'Syne', sans-serif;
+                font-size: 19px;
+                font-weight: 800;
+            }
+
+            .hbrand em {
+                color: var(--amber);
+                font-style: normal;
+            }
+
+            .hright {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .uchip {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: var(--bg3);
+                border: 1px solid var(--border);
+                border-radius: 100px;
+                padding: 6px 11px 6px 8px;
+            }
+
+            .uchip .dot {
+                width: 7px;
+                height: 7px;
+                background: var(--green);
+                border-radius: 50%;
+            }
+
+            .uchip span {
+                font-size: 13px;
+                color: var(--text2);
+                max-width: 90px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .btn-out {
+                background: none;
+                border: 1px solid var(--border);
+                border-radius: 9px;
+                color: var(--text2);
+                font-size: 13px;
+                padding: 8px 14px;
+                cursor: pointer;
+                font-family: 'DM Sans', sans-serif;
+                font-weight: 500;
+            }
+
+            .app-body {
+                flex: 1;
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
+                padding: 14px 14px;
+                padding-bottom: calc(90px + var(--safe-b));
+            }
+
+            /* ITEM BAR */
+            .item-bar {
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 14px 15px;
+                margin-bottom: 14px;
+            }
+
+            .ibar-lbl {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+                color: var(--text2);
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .ibar-row {
+                display: flex;
+                gap: 9px;
+                align-items: center;
+            }
+
+            #item-select {
+                flex: 1;
+                min-width: 0;
+                padding: 14px 38px 14px 14px;
+                background: var(--bg3);
+                border: 1.5px solid var(--border);
+                border-radius: 11px;
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                font-size: 15px;
+                font-weight: 500;
+                outline: none;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23998f7a' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 14px center;
+            }
+
+            #item-select:focus {
+                border-color: var(--amber);
+            }
+
+            #item-select option {
+                background: var(--bg2);
+            }
+
+            .btn-new {
+                flex-shrink: 0;
+                padding: 14px 16px;
+                background: rgba(232, 160, 32, .1);
+                border: 1.5px dashed rgba(232, 160, 32, .45);
+                border-radius: 11px;
+                color: var(--amber);
+                font-family: 'Syne', sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .btn-new:active {
+                background: rgba(232, 160, 32, .2);
+            }
+
+            /* PLACEHOLDER */
+            .ph-card {
+                background: var(--bg2);
+                border: 1.5px dashed var(--border);
+                border-radius: var(--radius);
+                padding: 44px 16px;
+                text-align: center;
+                color: var(--text2);
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 14px;
+            }
+
+            .ph-card .ico {
+                font-size: 42px;
+                display: block;
+                margin-bottom: 12px;
+            }
+
+            /* STOCK CARDS */
+            .scards {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .sc-wide {
+                grid-column: 1 / -1;
+            }
+
+            .sc {
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 16px 15px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .sc::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 2.5px;
+            }
+
+            .sc.s-tot::after {
+                background: var(--text3);
+            }
+
+            .sc.s-rem::after {
+                background: var(--amber);
+            }
+
+            .sc.s-use::after {
+                background: var(--red);
+            }
+
+            .sc-lbl {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: var(--text3);
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .sc-val {
+                font-family: 'Syne', sans-serif;
+                font-size: 34px;
+                font-weight: 800;
+                line-height: 1;
+                letter-spacing: -1.5px;
+            }
+
+            .sc-val.a {
+                color: var(--amber);
+            }
+
+            .sc-val.r {
+                color: var(--red);
+            }
+
+            .sc-unit {
+                font-family: 'DM Sans', sans-serif;
+                font-size: 14px;
+                color: var(--text2);
+                font-weight: 600;
+                margin-left: 2px;
+                letter-spacing: 0;
+            }
+
+            .sc-name {
+                font-size: 11px;
+                color: var(--text3);
+                margin-top: 5px;
+                font-family: 'DM Mono', monospace;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* PROGRESS */
+            .prog {
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 15px;
+                margin-bottom: 14px;
+            }
+
+            .prog-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+
+            .prog-ttl {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: var(--text2);
+                font-weight: 600;
+            }
+
+            .prog-pct {
+                font-family: 'DM Mono', monospace;
+                font-size: 14px;
+                color: var(--amber);
+            }
+
+            .prog-track {
+                height: 11px;
+                background: var(--bg3);
+                border-radius: 100px;
+                overflow: hidden;
+            }
+
+            .prog-fill {
+                height: 100%;
+                border-radius: 100px;
+                background: linear-gradient(90deg, var(--amber), var(--amber2));
+                transition: width .55s cubic-bezier(.22, 1, .36, 1);
+            }
+
+            .prog-fill.low {
+                background: linear-gradient(90deg, #c43e3e, var(--red));
+            }
+
+            /* SECTION HDR */
+            .shdr {
+                font-family: 'Syne', sans-serif;
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--text3);
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                margin: 16px 0 9px;
+            }
+
+            /* ACTION PANELS */
+            .panels {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .panel {
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                padding: 16px 14px;
+            }
+
+            .p-title {
+                font-family: 'Syne', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                margin-bottom: 3px;
+            }
+
+            .pdot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .pdot.g {
+                background: var(--green);
+                box-shadow: 0 0 7px var(--green);
+            }
+
+            .pdot.r {
+                background: var(--red);
+                box-shadow: 0 0 7px var(--red);
+            }
+
+            .p-sub {
+                font-size: 11px;
+                color: var(--text2);
+                margin-bottom: 13px;
+                line-height: 1.4;
+            }
+
+            .p-input {
+                width: 100%;
+                padding: 14px 10px;
+                background: var(--bg3);
+                border: 1.5px solid var(--border);
+                border-radius: 10px;
+                color: var(--text);
+                font-family: 'DM Mono', monospace;
+                font-size: 24px;
+                font-weight: 500;
+                outline: none;
+                text-align: center;
+                margin-bottom: 11px;
+                -moz-appearance: textfield;
+            }
+
+            .p-input::-webkit-inner-spin-button,
+            .p-input::-webkit-outer-spin-button {
+                display: none;
+            }
+
+            .p-input:focus {
+                border-color: var(--amber);
+            }
+
+            .p-btn {
+                width: 100%;
+                padding: 15px;
+                border: none;
+                border-radius: 10px;
+                font-family: 'Syne', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: filter .15s, transform .1s;
+            }
+
+            .p-btn:active {
+                transform: scale(.95);
+            }
+
+            .p-btn:disabled {
+                opacity: .4;
+            }
+
+            .p-btn.g {
+                background: var(--green);
+                color: var(--bg);
+            }
+
+            .p-btn.r {
+                background: var(--red);
+                color: #fff;
+            }
+
+            .p-msg {
+                font-size: 11px;
+                margin-top: 9px;
+                font-family: 'DM Mono', monospace;
+                min-height: 14px;
+            }
+
+            .p-msg.ok {
+                color: var(--green);
+            }
+
+            .p-msg.err {
+                color: var(--red);
+            }
+
+            /* LOG */
+            .log-wrap {
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: var(--radius);
+                overflow: hidden;
+            }
+
+            .log-hd {
+                padding: 14px 16px;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .log-ttl {
+                font-family: 'Syne', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+            }
+
+            .log-cnt {
+                font-family: 'DM Mono', monospace;
+                font-size: 11px;
+                color: var(--text3);
+                background: var(--bg3);
+                padding: 3px 8px;
+                border-radius: 100px;
+            }
+
+            .log-empty {
+                padding: 36px 16px;
+                text-align: center;
+                color: var(--text3);
+                font-size: 13px;
+            }
+
+            .tx {
+                padding: 13px 15px;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: 40px 1fr auto;
+                gap: 11px;
+                align-items: center;
+            }
+
+            .tx:last-child {
+                border-bottom: none;
+            }
+
+            .tx-ico {
+                width: 40px;
+                height: 40px;
+                border-radius: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 17px;
+                flex-shrink: 0;
+            }
+
+            .tx-ico.add {
+                background: rgba(82, 201, 122, .12);
+            }
+
+            .tx-ico.use {
+                background: rgba(224, 82, 82, .12);
+            }
+
+            .tx-info {
+                min-width: 0;
+            }
+
+            .tx-item {
+                font-size: 14px;
+                font-weight: 600;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .tx-meta {
+                font-size: 11px;
+                color: var(--text2);
+                margin-top: 2px;
+                font-family: 'DM Mono', monospace;
+            }
+
+            .tx-r {
+                text-align: right;
+                flex-shrink: 0;
+            }
+
+            .tx-qty {
+                font-family: 'DM Mono', monospace;
+                font-size: 15px;
+                font-weight: 500;
+            }
+
+            .tx-qty.add {
+                color: var(--green);
+            }
+
+            .tx-qty.use {
+                color: var(--red);
+            }
+
+            .tx-aft {
+                font-size: 11px;
+                color: var(--text3);
+                margin-top: 3px;
+                font-family: 'DM Mono', monospace;
+            }
+
+            /* BOTTOM SHEET (modal) */
+            .overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 200;
+                background: rgba(0, 0, 0, .75);
+                backdrop-filter: blur(7px);
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .25s;
+            }
+
+            .overlay.open {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .sheet {
+                background: var(--bg2);
+                border: 1px solid var(--border);
+                border-radius: 22px 22px 0 0;
+                width: 100%;
+                max-width: 500px;
+                padding: 0 20px calc(20px + var(--safe-b));
+                transform: translateY(100%);
+                transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+            }
+
+            .overlay.open .sheet {
+                transform: translateY(0);
+            }
+
+            .sheet-handle {
+                width: 38px;
+                height: 4px;
+                background: var(--border);
+                border-radius: 100px;
+                margin: 14px auto 22px;
+            }
+
+            .sheet-title {
+                font-family: 'Syne', sans-serif;
+                font-size: 21px;
+                font-weight: 800;
+                margin-bottom: 4px;
+            }
+
+            .sheet-sub {
+                font-size: 13px;
+                color: var(--text2);
+                margin-bottom: 22px;
+            }
+
+            .sheet-err {
+                color: var(--red);
+                font-size: 12px;
+                margin-top: 6px;
+                min-height: 16px;
+            }
+
+            .sheet-btns {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 10px;
+                margin-top: 16px;
+            }
+
+            .btn-c {
+                padding: 16px;
+                background: var(--bg3);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                color: var(--text2);
+                font-family: 'DM Sans', sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .btn-c:active {
+                filter: brightness(.9);
+            }
+
+            .btn-ok {
+                padding: 16px;
+                background: var(--amber);
+                border: none;
+                border-radius: 12px;
+                color: var(--bg);
+                font-family: 'Syne', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .btn-ok:active {
+                background: var(--amber2);
+            }
+
+            .btn-ok:disabled {
+                opacity: .5;
+            }
+
+            /* TOAST */
+            .toast {
+                position: fixed;
+                bottom: calc(18px + var(--safe-b));
+                left: 12px;
+                right: 12px;
+                z-index: 500;
+                max-width: 460px;
+                margin: 0 auto;
+                background: var(--bg2);
+                border: 1.5px solid var(--border);
+                border-radius: 14px;
+                padding: 15px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, .55);
+                transform: translateY(80px);
+                opacity: 0;
+                pointer-events: none;
+                transition: all .3s cubic-bezier(.22, 1, .36, 1);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .toast .t-i {
+                font-size: 18px;
+            }
+
+            .toast .t-t {
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .toast.ok {
+                border-color: rgba(82, 201, 122, .35);
+            }
+
+            .toast.err {
+                border-color: rgba(224, 82, 82, .35);
+            }
+
+            /* SPINNER */
+            .spin-pg {
+                position: fixed;
+                inset: 0;
+                z-index: 999;
+                background: var(--bg);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 16px;
+            }
+
+            .spin {
+                width: 38px;
+                height: 38px;
+                border: 3px solid var(--border);
+                border-top-color: var(--amber);
+                border-radius: 50%;
+                animation: rot .7s linear infinite;
+            }
+
+            .spin-t {
+                font-family: 'DM Mono', monospace;
+                font-size: 12px;
+                color: var(--text2);
+            }
+
+            @keyframes rot {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <!-- SPINNER -->
+        <div class="spin-pg" id="spinner">
+            <div class="spin"></div>
+            <div class="spin-t">Loading KitchenStock…</div>
+        </div>
+
+        <!-- ══ AUTH ══ -->
+        <div class="page hidden" id="page-auth">
+            <div class="auth-box">
+                <div class="auth-logo">Kitchen<em>Stock</em></div>
+                <div class="auth-tag">Raw Material Inventory System</div>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-in" onclick="setTab('login')">Login</button>
+                    <button class="auth-tab" style="display:none;">Register</button>
+                    <button class="auth-tab" id="tab-up" onclick="setTab('reg')">Register</button>
+                </div>
+
+                <label class="fl">Username</label>
+                <input class="fi" id="a-user" type="text" placeholder="yourname" autocomplete="username"
+                    autocapitalize="none" autocorrect="off" spellcheck="false" />
+
+                <label class="fl">Password</label>
+                <input class="fi" id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+                <div id="conf-row" style="display:none">
+                    <label class="fl">Confirm Password</label>
+                    <input class="fi" id="a-conf" type="password" placeholder="••••••••" autocomplete="new-password" />
+                </div>
+
+                <button class="auth-btn" id="a-btn" onclick="doAuth()">Sign In</button>
+                <div class="auth-err" id="a-err"></div>
+            </div>
+        </div>
+
+        <!-- ══ APP ══ -->
+        <div class="page hidden" id="page-app">
+
+            <header class="app-header">
+                <div class="hbrand">Kitchen<em>Stock</em></div>
+                <div class="hright">
+                    <div class="uchip">
+                        <div class="dot"></div>
+                        <span id="h-user">—</span>
+                    </div>
+                    <button class="btn-out" onclick="doLogout()">Out</button>
+                </div>
+            </header>
+
+            <div class="app-body">
+
+                <!-- ITEM SELECTOR -->
+                <div class="item-bar">
+                    <div class="ibar-lbl">Raw Material</div>
+                    <div class="ibar-row">
+                        <select id="item-select" onchange="onItemChange()">
+                            <option value="">— select an item —</option>
+                        </select>
+                        <button class="btn-new" onclick="openSheet()">＋ New</button>
+                    </div>
+                </div>
+
+                <!-- PLACEHOLDER -->
+                <div class="ph-card" id="ph">
+                    <span class="ico">🫙</span>
+                    Select an item above or tap <strong style="color:var(--amber)">＋ New</strong> to add your first raw
+                    material
+                </div>
+
+                <!-- STOCK SECTION -->
+                <div id="stock-sec" style="display:none">
+
+                    <div class="scards" id="scards"></div>
+
+                    <div class="prog" id="prog">
+                        <div class="prog-row">
+                            <span class="prog-ttl">Stock Level</span>
+                            <span class="prog-pct" id="prog-pct">0%</span>
+                        </div>
+                        <div class="prog-track">
+                            <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="shdr">Update Stock</div>
+                    <div class="panels">
+                        <!-- USE -->
+                        <div class="panel">
+                            <div class="p-title">
+                                <div class="pdot r"></div>Use
+                            </div>
+                            <div class="p-sub">Deduct consumed quantity</div>
+                            <input class="p-input" id="use-qty" type="number" inputmode="decimal" placeholder="0.00"
+                                min="0.01" step="0.01" />
+                            <button class="p-btn r" onclick="doUse()">Deduct</button>
+                            <div class="p-msg" id="use-msg"></div>
+                        </div>
+                        <!-- ADD -->
+                        <div class="panel">
+                            <div class="p-title">
+                                <div class="pdot g"></div>Add
+                            </div>
+                            <div class="p-sub">Restock / new delivery</div>
+                            <input class="p-input" id="add-qty" type="number" inputmode="decimal" placeholder="0.00"
+                                min="0.01" step="0.01" />
+                            <button class="p-btn g" onclick="doAdd()">Add</button>
+                            <div class="p-msg" id="add-msg"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══ ADD ITEM SHEET ══ -->
+        <div class="overlay" id="sheet-overlay" onclick="olvClick(event)">
+            <div class="sheet">
+                <div class="sheet-handle"></div>
+                <div class="sheet-title">Add New Item</div>
+                <div class="sheet-sub">Adds to your inventory dropdown</div>
+                <label class="fl">Item Name</label>
+                <input class="fi" id="s-name" type="text" placeholder="e.g. Wheat Flour, Salt…"
+                    autocapitalize="words" />
+                <label class="fl">Starting Stock (kg)</label>
+                <input class="fi" id="s-stock" type="number" inputmode="decimal" placeholder="0.00" min="0"
+                    step="0.01" />
+                <div class="sheet-err" id="s-err"></div>
+                <div class="sheet-btns">
+                    <button class="btn-c" onclick="closeSheet()">Cancel</button>
+                    <button class="btn-ok" id="s-ok" onclick="confirmItem()">Add Item</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST -->
+        <div class="toast" id="toast">
+            <span class="t-i" id="t-i">✓</span>
+            <span class="t-t" id="t-t">Done</span>
+        </div>
+
+        <script type="module">
+
+            const ADMINS = [
+                {username: "aaryan", password: "1234"},
+                {username: "admin2", password: "5678"}
+            ];
+
+            const FIREBASE_CONFIG = {
+                apiKey: "AIzaSyBEuay0YzwvXCw0jKxsi1WFuZasGdEIW4Y",
+                authDomain: "foodstock-hostel.firebaseapp.com",
+                projectId: "foodstock-hostel",
+                storageBucket: "foodstock-hostel.firebasestorage.app",
+                messagingSenderId: "100865727347",
+                appId: "1:100865727347:web:444912d2b7d02f96e68306",
+                measurementId: "G-LZ6Z4NT9G2"
+            };
+
+            // Initialize Firebase
+            let app = initializeApp(FIREBASE_CONFIG);
+
+            // Username → internal Firebase email (user never sees this)
+            const toEmail = u => u.toLowerCase().trim() + "@kitchenstock.app";
+
+            const CONF = !Object.values(FIREBASE_CONFIG).some(v => v.startsWith("PASTE_"));
+
+            import {initializeApp}
+                from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+            import {getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged}
+                from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+            import {getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, serverTimestamp, query, orderBy, limit}
+                from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+            let auth, db;
+            let me = null, meU = '';
+            let curItem = null;
+            let stockUnsub = null, txUnsub = null;
+            let itemsCache = [];
+
+            if (CONF) {
+                app = initializeApp(FIREBASE_CONFIG);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                onAuthStateChanged(auth, async user => {
+                    g('spinner').style.display = 'none';
+                    if (user) {
+                        me = user;
+                        try {
+                            const pd = await getDoc(doc(db, 'userProfiles', user.uid));
+                            meU = pd.exists() ? pd.data().username : user.email.split('@')[0];
+                        } catch {meU = user.email.split('@')[0];}
+                        openApp();
+                    } else {
+                        me = null;
+                        showPage('page-auth');
+                    }
+                });
+            } else {
+                g('spinner').style.display = 'none';
+                showPage('page-auth');
+                showE('a-err', '⚠ Firebase not configured yet. Add your credentials inside the HTML file.');
+            }
+
+            function g(id) {return document.getElementById(id);}
+            function showPage(id) {
+                ['page-auth', 'page-app'].forEach(p => g(p).classList.toggle('hidden', p !== id));
+            }
+            function showE(id, msg) {const e = g(id); e.textContent = msg; e.style.display = 'block';}
+            function clearE(id) {const e = g(id); e.textContent = ''; e.style.display = 'none';}
+
+            // ── AUTH ─────────────────────────────────────────────────────────────
+            let authMode = 'login';
+
+            window.setTab = m => {
+                authMode = m;
+                g('tab-in').classList.toggle('active', m === 'login');
+                g('tab-up').classList.toggle('active', m === 'reg');
+                g('conf-row').style.display = m === 'reg' ? 'block' : 'none';
+                g('a-btn').textContent = m === 'login' ? 'Sign In' : 'Create Account';
+                clearE('a-err');
+            };
+
+            window.doAuth = async () => {
+
+                if (!CONF) {
+                    showE('a-err', 'Firebase not configured.');
+                    return;
+                }
+
+                const user = g('a-user').value.trim();
+                const pass = g('a-pass').value;
+
+                clearE('a-err');
+
+                // ✅ ONLY ALLOWED USERS
+                const allowedUsers = ["aaryan", "admin2"];
+
+                if (!allowedUsers.includes(user.toLowerCase())) {
+                    showE('a-err', 'Access Denied ❌ (Not an admin)');
+                    return;
+                }
+
+                if (!user || !pass) {
+                    showE('a-err', 'Please fill in all fields.');
+                    return;
+                }
+
+                const btn = g('a-btn');
+                btn.disabled = true;
+                btn.textContent = '…';
+
+                try {
+                    const email = user.toLowerCase() + "@kitchenstock.app";
+
+                    // 🔥 ONLY LOGIN (NO REGISTER)
+                    await signInWithEmailAndPassword(auth, email, pass);
+
+                } catch (e) {
+
+                    const mp = {
+                        'auth/user-not-found': 'Admin not created in Firebase ❌',
+                        'auth/wrong-password': 'Wrong password ❌',
+                        'auth/invalid-credential': 'Invalid login ❌'
+                    };
+
+                    showE('a-err', mp[e.code] || e.message);
+
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
+                }
+            };
+
+            window.doLogout = async () => {
+                if (stockUnsub) {stockUnsub(); stockUnsub = null;}
+                if (txUnsub) {txUnsub(); txUnsub = null;}
+                curItem = null;
+                if (auth) await signOut(auth);
+            };
+
+            // ── OPEN APP ──────────────────────────────────────────────────────────
+            function openApp() {
+                g('h-user').textContent = meU;
+                showPage('page-app');
+                loadItems();
+                listenTx();
+            }
+
+            // ── ITEMS ─────────────────────────────────────────────────────────────
+            async function loadItems() {
+                const snap = await getDocs(collection(db, 'items'));
+                itemsCache = [];
+                snap.forEach(d => itemsCache.push({id: d.id, ...d.data()}));
+                itemsCache.sort((a, b) => a.name.localeCompare(b.name));
+                rebuildDrop();
+            }
+
+            function rebuildDrop() {
+                const sel = g('item-select'), cur = sel.value;
+                sel.innerHTML = '<option value="">— select an item —</option>';
+                itemsCache.forEach(it => {
+                    const o = document.createElement('option');
+                    o.value = it.id; o.textContent = it.name;
+                    sel.appendChild(o);
+                });
+                if (cur && itemsCache.find(i => i.id === cur)) sel.value = cur;
+            }
+
+            window.onItemChange = () => {
+                const id = g('item-select').value;
+                if (!id) {
+                    curItem = null;
+                    g('ph').style.display = 'block';
+                    g('stock-sec').style.display = 'none';
+                    if (stockUnsub) {stockUnsub(); stockUnsub = null;}
+                    return;
+                }
+                g('ph').style.display = 'none';
+                g('stock-sec').style.display = 'block';
+                if (stockUnsub) {stockUnsub(); stockUnsub = null;}
+                stockUnsub = onSnapshot(doc(db, 'stock', id), snap => {
+                    curItem = snap.exists()
+                        ? {id: snap.id, ...snap.data()}
+                        : {id, name: itemsCache.find(i => i.id === id)?.name || id, currentStock: 0, totalAdded: 0};
+                    renderStock();
+                });
+            };
+
+            // ── RENDER STOCK ──────────────────────────────────────────────────────
+            function renderStock() {
+                if (!curItem) return;
+                const {name, currentStock: cs, totalAdded: ta} = curItem;
+                const used = Math.max(0, ta - cs);
+                const pct = ta > 0 ? Math.max(0, Math.min(100, cs / ta * 100)) : 0;
+                g('scards').innerHTML = `
+      <div class="sc s-tot sc-wide">
+        <div class="sc-lbl">Total Ever Added</div>
+        <div class="sc-val">${f(ta)}<span class="sc-unit"> kg</span></div>
+        <div class="sc-name">${esc(name)}</div>
+      </div>
+      <div class="sc s-rem">
+        <div class="sc-lbl">Remaining</div>
+        <div class="sc-val a">${f(cs)}<span class="sc-unit"> kg</span></div>
+      </div>
+      <div class="sc s-use">
+        <div class="sc-lbl">Used</div>
+        <div class="sc-val r">${f(used)}<span class="sc-unit"> kg</span></div>
+      </div>`;
+                g('prog-pct').textContent = pct.toFixed(1) + '%';
+                const fill = g('prog-fill');
+                fill.style.width = pct + '%';
+                fill.classList.toggle('low', pct < 25);
+            }
+
+            // ── USE ───────────────────────────────────────────────────────────────
+            window.doUse = async () => {
+                if (!curItem) return;
+                const qty = parseFloat(g('use-qty').value);
+                if (!qty || qty <= 0) {setMsg('use', 'Enter a valid qty.', 'err'); return;}
+                if (qty > curItem.currentStock) {setMsg('use', `Only ${f(curItem.currentStock)} kg left`, 'err'); return;}
+                try {
+                    const before = curItem.currentStock, after = rnd(before - qty);
+                    await updateDoc(doc(db, 'stock', curItem.id), {currentStock: after, lastUpdated: serverTimestamp(), updatedBy: meU});
+                    await addDoc(collection(db, 'transactions'), {
+                        itemId: curItem.id, itemName: curItem.name, type: 'use',
+                        quantity: qty, stockBefore: before, stockAfter: after,
+                        timestamp: serverTimestamp(), userId: me.uid, userBy: meU
+                    });
+                    g('use-qty').value = '';
+                    setMsg('use', `✓ Deducted ${f(qty)} kg`, 'ok');
+                    toast(`Used ${f(qty)} kg of ${curItem.name}`, 'ok');
+                } catch (e) {setMsg('use', e.message, 'err');}
+            };
+
+            // ── ADD ───────────────────────────────────────────────────────────────
+            window.doAdd = async () => {
+                if (!curItem) return;
+                const qty = parseFloat(g('add-qty').value);
+                if (!qty || qty <= 0) {setMsg('add', 'Enter a valid qty.', 'err'); return;}
+                try {
+                    const before = curItem.currentStock, after = rnd(before + qty);
+                    const newTotal = rnd((curItem.totalAdded || 0) + qty);
+                    const ref = doc(db, 'stock', curItem.id);
+                    const snap = await getDoc(ref);
+                    if (snap.exists()) {
+                        await updateDoc(ref, {currentStock: after, totalAdded: newTotal, lastUpdated: serverTimestamp(), updatedBy: meU});
+                    } else {
+                        await setDoc(ref, {itemId: curItem.id, itemName: curItem.itemName, currentStock: after, totalAdded: newTotal, lastUpdated: serverTimestamp(), updatedBy: meU});
+                    }
+                    await addDoc(collection(db, 'transactions'), {
+                        itemId: curItem.id, itemName: curItem.name, type: 'add',
+                        quantity: qty, stockBefore: before, stockAfter: after,
+                        timestamp: serverTimestamp(), userId: me.uid, userBy: meU
+                    });
+                    g('add-qty').value = '';
+                    setMsg('add', `✓ Added ${f(qty)} kg`, 'ok');
+                    toast(`Added ${f(qty)} kg to ${curItem.name}`, 'ok');
+                } catch (e) {setMsg('add', e.message, 'err');}
+            };
+
+            // ── TX LOG ────────────────────────────────────────────────────────────
+            function listenTx() {
+                const q = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'), limit(80));
+                txUnsub = onSnapshot(q, snap => {
+                    const rows = [];
+                    snap.forEach(d => rows.push({id: d.id, ...d.data()}));
+                    renderTx(rows);
+                });
+            }
+
+            function renderTx(rows) {
+                g('log-cnt').textContent = rows.length;
+                const el = g('log-body');
+                if (!rows.length) {el.innerHTML = '<div class="log-empty">No transactions yet.</div>'; return;}
+                el.innerHTML = rows.map(r => {
+                    const isA = r.type === 'add';
+                    const dt = r.timestamp?.toDate ? fmtD(r.timestamp.toDate()) : '—';
+                    return `
+      <div class="tx">
+        <div class="tx-ico ${r.type}">${isA ? '＋' : '▼'}</div>
+        <div class="tx-info">
+          <div class="tx-item">${esc(r.itemName || '—')}</div>
+          <div class="tx-meta">${dt} · ${esc(r.userBy || '—')}</div>
+        </div>
+        <div class="tx-r">
+          <div class="tx-qty ${r.type}">${isA ? '+' : '−'}${f(r.quantity)} kg</div>
+          <div class="tx-aft">→ ${f(r.stockAfter)} kg</div>
+        </div>
+      </div>`;
+                }).join('');
+            }
+
+            // ── ADD ITEM ──────────────────────────────────────────────────────────
+            window.openSheet = () => {
+                g('s-name').value = ''; g('s-stock').value = '';
+                g('s-err').textContent = '';
+                g('s-ok').disabled = false; g('s-ok').textContent = 'Add Item';
+                g('sheet-overlay').classList.add('open');
+                setTimeout(() => g('s-name').focus(), 200);
+            };
+            window.closeSheet = () => g('sheet-overlay').classList.remove('open');
+            window.olvClick = e => {if (e.target === g('sheet-overlay')) closeSheet();};
+
+            window.confirmItem = async () => {
+                if (!CONF) {g('s-err').textContent = 'Firebase not configured.'; return;}
+                const name = g('s-name').value.trim();
+                const stock = parseFloat(g('s-stock').value) || 0;
+                if (!name) {g('s-err').textContent = 'Item name is required.'; return;}
+                if (itemsCache.find(i => i.name.toLowerCase() === name.toLowerCase())) {
+                    g('s-err').textContent = 'Item already exists.'; return;
+                }
+                const btn = g('s-ok'); btn.disabled = true; btn.textContent = 'Adding…';
+                try {
+                    const iRef = await addDoc(collection(db, 'items'), {name, createdAt: serverTimestamp(), createdBy: meU});
+                    await setDoc(doc(db, 'stock', iRef.id), {
+                        itemId: iRef.id, itemName: name,
+                        currentStock: stock, totalAdded: stock,
+                        lastUpdated: serverTimestamp(), updatedBy: meU
+                    });
+                    if (stock > 0) {
+                        await addDoc(collection(db, 'transactions'), {
+                            itemId: iRef.id, itemName: name, type: 'add', quantity: stock,
+                            stockBefore: 0, stockAfter: stock,
+                            timestamp: serverTimestamp(), userId: me.uid, userBy: meU
+                        });
+                    }
+                    itemsCache.push({id: iRef.id, name});
+                    itemsCache.sort((a, b) => a.name.localeCompare(b.name));
+                    rebuildDrop();
+                    g('item-select').value = iRef.id;
+                    onItemChange();
+                    closeSheet();
+                    toast(`"${name}" added!`, 'ok');
+                } catch (e) {
+                    g('s-err').textContent = 'Error: ' + e.message;
+                } finally {btn.disabled = false; btn.textContent = 'Add Item';}
+            };
+
+            // ── UTILS ─────────────────────────────────────────────────────────────
+            const f = n => isNaN(n) ? '0.00' : Number(n).toFixed(2);
+            const rnd = n => Math.round(n * 1000) / 1000;
+            const esc = s => {const d = document.createElement('div'); d.textContent = s; return d.innerHTML;};
+            const fmtD = d => d.toLocaleString('en-IN', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true});
+
+            let mT = {};
+            function setMsg(w, msg, t) {
+                const el = g(w + '-msg'); el.textContent = msg; el.className = 'p-msg ' + t;
+                if (mT[w]) clearTimeout(mT[w]);
+                mT[w] = setTimeout(() => {el.textContent = ''; el.className = 'p-msg';}, 4500);
+            }
+
+            let tT;
+            function toast(msg, type = 'ok') {
+                const el = g('toast');
+                g('t-i').textContent = type === 'ok' ? '✓' : '✕';
+                g('t-t').textContent = msg;
+                el.className = 'toast ' + type + ' show';
+                if (tT) clearTimeout(tT);
+                tT = setTimeout(() => el.classList.remove('show'), 3000);
+            }
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeSheet();
+                if (e.key === 'Enter' && !g('page-auth').classList.contains('hidden')) doAuth();
+            });
+        </script>
+    </body>
+
+</html>
